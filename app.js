@@ -24,9 +24,13 @@ let dataMahasiswa = [
 ];
 
 // 2. Elemen Dom Utama.
+const alertBox = document.getElementById("alert-box");
+const tabelBody = document.getElementById("tabel-body-mahasiswa");
+const totalBadge = document.getElementById("total-mahasiswa-badge");
+const totalInfo = document.getElementById("total-mahasiswa-info");
+ 
 
 
-/*
 // Seleksi Elemen Formulir Tambah Mahasiswa
 const formTambah = document.getElementById("form-tambah-mahasiswa");
 const inputNim = document.getElementById("nim");
@@ -34,47 +38,114 @@ const inputNama = document.getElementById("nama");
 const selectProdi = document.getElementById("program_studi");
 const inputAngkatan = document.getElementById("angkatan");
 const inputEmail = document.getElementById("email");
-*/
+
 
 
 // 3. Fungsi Menampilkan Notifikasi Alert Interaktif (Percobaan 3-1).
+function showAlert(message, type = "success") {
+    if (!alertBox) return;
+    alertBox.textContent = message;
+    alertBox.className = `alert alert-${type} show`
 
-
-
-// 4. Fungsi Pembaruan Counter Statistik Real-Time.
-
-
-
-// 5. Fungsi Render Tabel ke DOM Secara Dinamis (Percobaan 3-2).
-
-function renderTable(data = dataMahasiswa) {
-    if (!tabelBody) return;
-
-    // Percobaan 3-2 langkah 6
-
-    if (data.length === 0) {
-       
-        // Percobaan 3-2 langkah 7
-       
-    }
-
-    
-    data.forEach((mhs, index) => {
-        const tr = document.createElement("tr");
-        
-        // Percobaan 3-2 langkah 8
-
-
-        // Percobaan 3-2 langkah 9
-        
-    });
-
-    // Percobaan 3-2 langkah 10
-
+    setTimeout(() => {
+        alertBox.className = `alert-box`;
+    }, 4000)
 }
 
-// 6. Validasi Form Sisi Klien Menggunakan Regular Expression (Percobaan 3-3).
+// 4. Fungsi Pembaruan Counter Statistik Real-Time.
+function updateCounter(displayedCount, totalCount = dataMahasiswa.length) {
+    if (totalBadge) {
+        totalBadge.textContent = totalCount;
+    }
+    if (totalInfo) {
+        totalInfo.textContent = `Menampilkan: ${displayedCount} dari ${totalCount} mahasiswa`;
+    }
+}
 
+// 5. Fungsi Render Tabel ke DOM Secara Dinamis (Percobaan 3-2).
+function renderTable(data = dataMahasiswa) {
+    if (!tabelBody) return
+        tabelBody.innerHTML = ""
+// Percobaan 3-2 langkah 6
+    if (data.length === 0) {
+        tabelBody.innerHTML = `
+            <tr>
+                <td colspan="8" class = "Empty-row">
+                    Tidak ada data mahasiswa yang cocok atau tersimpan dalam sistem.
+                </td>
+            </tr>
+        `;
+
+    updateCounter(0);
+    return;
+    }
+    // Percobaan 3-2 langkah 7
+    data.forEach((mhs, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${index + 1}</td>
+            <td>
+                <img src="img/avater-default.svg" alt="foto ${mhs.nama}" class="avatar-smg" widht="36" height="36">
+            </td>
+
+            <td> <strong>${mhs.npm}</strong> </td>
+            <td>${mhs.nama}</td>
+
+            <td><span class="badge">${mhs.program_studi}</span></td>
+            <td>${mhs.angkatan}</td>
+            <td><a href="mailto:${mhs.email}" class="link-email">${mhs.email}</a></td>
+        
+            <button type="button" class"btn btn-danger btn-sm" oneclick= "hapusMahasiswa(`${mhs.npm}`)">
+                    Hapus
+                </button>
+
+             </td>
+          `;
+          tabelBody.appendChild(tr);
+    });
+        // Percobaan 3-2 langkah 8
+
+    updateCounter(data.lenght);
+}
+// Percobaan 3-2 langkah 9
+// Percobaan 3-2 langkah 10
+document.addEventListener("DOMContentLoaded", function () {
+    showAlert("Selamat datang di Sstem Informasi Data Mahasiswa(SIMA)!", "info");
+});
+
+// 6. Validasi Form Sisi Klien Menggunakan Regular Expression (Percobaan 3-3).
+function validateForm(npm,nama, prodi, angkatan, email) {
+    //validasi Npm
+    if (!/^[0-9]{8,12}$/.test(npm)){
+        return {isValid: false, massage: "Npm harus berupa 8-12 digit angka."};
+    }
+    
+    //Validasi Keunikan NPM
+    if(dataMahasiswa.some(mhs=> mhs.npm === npm)){
+        return {isValid: false, massage: `NPM ${npm} sudah terdaftar dalam sistem SIMA`};
+    }
+    
+    if(nama.trim().lenght < 3){
+     return {isValiid: false, massage:"Nama lengkap minimal harus terdiri dari 3 karakter."};
+        }
+    
+    //validasi Program Studi
+    if (!prodi){
+        return {isValiid: false, massage:"Silahkan pilih salah satu Program Studi dari daftar."};
+    }
+
+    //validasi Tahun
+    const angk = presenInt(angkatan, 10);
+    if (!isNaN(angk) || angk <2018 || angk >2026){
+        return {isValiid: false, massage:"Tahun angkatan harus berupa angka antara 2018 hingga 2026."};
+    }
+
+    //validasi format email
+    if (!/^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+        return {isValiid: false, massage:"Format email tidak falid (contoh: nama@domain.ic.id)."};   
+    }
+    return {isValid: true, message: ""};
+}
 
 
 // 7. Event Handling Tambah Data Tanpa Reload (Percobaan 3-4).
